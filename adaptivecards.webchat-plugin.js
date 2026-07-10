@@ -1,10 +1,12 @@
 /**
- * Scout Adaptive Cards — official Frontier brand, xApp-aligned density
+ * Scout Adaptive Cards — Document Damage / xApp visual standard
  *
- * Tokens: frontier-tokens.css (#006643, #00ACEC, Montserrat)
- * Header: solid green + white type (claim-header pattern)
- * Marks: official Badge / domain icons from brand kit (not custom AI art)
- * Spacing: 16px rhythm, comfortable type scale, no dual chrome
+ * Matches damage-photo xApp:
+ *   Full-width green header, centered white title hierarchy
+ *   White body on content grid, consistent 16px padding
+ *   Primary green scout-btn actions
+ *
+ * Header title wrap for Webchat chrome is handled in scout-plugin.js
  */
 (function () {
   'use strict';
@@ -29,8 +31,6 @@
     surfaceSecondary: '#F8FAFB',
     text: '#1A1A1A',
     radiusLg: '12px',
-    radiusXl: '16px',
-    shadow: '0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)',
     focusRing: '0 0 0 3px rgba(0,172,236,0.4)',
   };
 
@@ -50,44 +50,71 @@
     if (old) old.parentNode.removeChild(old);
 
     var css = [
-      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }',
+      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }',
 
-      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 360px; margin: 6px 0 10px; animation: scoutAcIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }',
-      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid rgba(0,102,67,0.10); box-shadow: ' + T.shadow + '; }',
+      /* Full message-width container (not a floating mini-card) */
+      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; width: 100%; max-width: 100%; margin: 4px 0 8px; animation: scoutAcIn 0.25s ease both; box-sizing: border-box; }',
+      '.scout-ac-shell .scout-ac-frame { border-radius: 12px; overflow: hidden; background: ' + T.surface + '; border: 1px solid ' + T.grayLight + '; box-shadow: none; }',
       '.scout-ac-shell .scout-ac-host { padding: 0; background: ' + T.surface + '; }',
-      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 0 !important; }',
+      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 0 !important; width: 100% !important; }',
       '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; line-height: 1.45 !important; margin: 0 !important; }',
       '.scout-ac-shell .ac-container { border-radius: 0 !important; }',
 
-      /* Green header blocks → always white type (xApp claim-header) */
+      /* Damage-header: full-bleed green, centered, safe padding (no corner clip) */
+      '.scout-ac-shell .ac-container[style*="background-color: #006643"],',
+      '.scout-ac-shell .ac-container[style*="background-color: rgb(0, 102, 67)"],',
+      '.scout-ac-shell .ac-container[style*="background-color:#006643"] {',
+      '  padding: 20px 16px 16px !important;',
+      '  text-align: center !important;',
+      '  background-color: ' + T.green + ' !important;',
+      '}',
       '.scout-ac-shell .ac-container[style*="background-color: #006643"] .ac-textBlock,',
       '.scout-ac-shell .ac-container[style*="background-color: rgb(0, 102, 67)"] .ac-textBlock,',
-      '.scout-ac-shell .ac-container[style*="background-color:#006643"] .ac-textBlock { color: #FFFFFF !important; }',
+      '.scout-ac-shell .ac-container[style*="background-color:#006643"] .ac-textBlock {',
+      '  color: #FFFFFF !important;',
+      '  text-align: center !important;',
+      '}',
 
-      /* Domain icon in body: keep green icon crisp on white */
-      '.scout-ac-shell img { object-fit: contain !important; display: block !important; }',
+      /* Body content grid: one horizontal inset (exclude green header containers via class hook) */
+      '.scout-ac-shell .scout-ac-body-pad { padding-left: 16px !important; padding-right: 16px !important; box-sizing: border-box !important; }',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-columnSet,',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-textBlock { padding-left: 16px !important; padding-right: 16px !important; box-sizing: border-box !important; }',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-columnSet,',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-textBlock,',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-container { padding-top: 16px !important; }',
 
-      /* Facts: calm, even rhythm */
-      '.scout-ac-shell .ac-factSet { margin: 0 !important; }',
-      '.scout-ac-shell .ac-fact-title { color: ' + T.grayMid + ' !important; font-weight: 600 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.04em !important; padding: 2px 12px 2px 0 !important; vertical-align: top !important; }',
-      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 600 !important; font-size: 13px !important; padding: 2px 0 !important; }',
-      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; margin: 10px 0 !important; }',
+      '.scout-ac-shell img { object-fit: contain !important; display: block !important; margin: 0 auto !important; }',
 
-      /* Actions: scout-btn sizing (44px tap) with 16px side padding */
-      '.scout-ac-shell .ac-actionSet { display: flex !important; flex-direction: column !important; gap: 8px !important; padding: 4px 16px 16px !important; margin: 0 !important; }',
-      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 44px !important; padding: 12px 20px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; letter-spacing: 0 !important; }',
+      '.scout-ac-shell .ac-factSet { margin: 12px 16px 0 !important; width: auto !important; }',
+      '.scout-ac-shell .ac-fact-title { color: ' + T.grayMid + ' !important; font-weight: 600 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; padding: 4px 12px 4px 0 !important; white-space: nowrap !important; }',
+      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 600 !important; font-size: 13px !important; padding: 4px 0 !important; }',
+      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; margin: 12px 16px !important; }',
+
+      /* Actions — full width of content grid, scout-btn */
+      '.scout-ac-shell .ac-actionSet { display: flex !important; flex-direction: column !important; gap: 10px !important; padding: 16px !important; margin: 0 !important; box-sizing: border-box !important; }',
+      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton {',
+      '  display: inline-flex !important; align-items: center !important; justify-content: center !important;',
+      '  width: 100% !important; min-height: 48px !important; padding: 12px 20px !important;',
+      '  border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important;',
+      '  font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important;',
+      '  transition: all 150ms ease !important; outline: none !important; box-sizing: border-box !important;',
+      '  pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important;',
+      '}',
       '.scout-ac-shell .ac-pushButton:focus-visible { box-shadow: ' + T.focusRing + ' !important; }',
-
-      '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive { background: ' + T.green + ' !important; background-color: ' + T.green + ' !important; color: #FFFFFF !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell button.scout-ac-btn-primary:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive {',
+      '  background: ' + T.green + ' !important; background-color: ' + T.green + ' !important;',
+      '  color: #FFFFFF !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important;',
+      '}',
+      '.scout-ac-shell button.scout-ac-btn-primary:hover { background: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; }',
       '.scout-ac-shell button.scout-ac-btn-primary:active { transform: scale(0.98) !important; }',
-
-      '.scout-ac-shell button.scout-ac-btn-secondary { background: transparent !important; background-color: transparent !important; color: ' + T.cyan + ' !important; border: 2px solid ' + T.cyan + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; background-color: ' + T.cyanSoft + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-secondary {',
+      '  background: transparent !important; color: ' + T.cyan + ' !important;',
+      '  border: 2px solid ' + T.cyan + ' !important;',
+      '}',
+      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; }',
 
       '.scout-ac-shell a { color: ' + T.cyan + ' !important; font-weight: 600; }',
-      '.scout-ac-error { padding: 16px; font-size: 13px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; }',
-      '.scout-ac-loading { padding: 16px; font-size: 12px; font-weight: 600; color: ' + T.green + '; font-family: Montserrat, sans-serif; }',
+      '.scout-ac-error, .scout-ac-loading { padding: 16px; font-size: 13px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; }',
     ].join('\n');
 
     var el = document.createElement('style');
@@ -123,7 +150,7 @@
         default: 14,
         medium: 16,
         large: 18,
-        extraLarge: 22,
+        extraLarge: 20,
       },
       fontWeights: {
         lighter: 400,
@@ -131,22 +158,15 @@
         bolder: 700,
       },
       spacing: {
-        small: 8,
-        default: 12,
-        medium: 16,
-        large: 20,
-        extraLarge: 24,
+        small: 6,
+        default: 10,
+        medium: 14,
+        large: 16,
+        extraLarge: 20,
         padding: 16,
       },
-      imageSizes: {
-        small: 32,
-        medium: 48,
-        large: 72,
-      },
-      separator: {
-        lineThickness: 1,
-        lineColor: T.grayLight,
-      },
+      imageSizes: { small: 40, medium: 48, large: 72 },
+      separator: { lineThickness: 1, lineColor: T.grayLight },
       containerStyles: {
         default: {
           backgroundColor: '#FFFFFF00',
@@ -157,23 +177,23 @@
             warning: { default: '#E0B774', subtle: '#C9A05E' },
             attention: { default: '#BD696A', subtle: '#a85a5b' },
             dark: { default: T.text, subtle: T.grayBlue },
-            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
           },
         },
         emphasis: {
           backgroundColor: T.green,
           foregroundColors: {
-            default: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
-            accent: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
-            good: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            default: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            accent: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            good: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
             warning: { default: '#FFE08A', subtle: '#FFD45C' },
             attention: { default: '#FFB4B4', subtle: '#FF8F8F' },
-            dark: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
-            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            dark: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
           },
         },
         accent: {
-          backgroundColor: 'rgba(0,172,236,0.08)',
+          backgroundColor: T.surfaceSecondary,
           foregroundColors: {
             default: { default: T.text, subtle: T.grayBlue },
             accent: { default: T.cyan, subtle: '#0090C7' },
@@ -198,9 +218,9 @@
         },
       },
       actions: {
-        maxActions: 3,
+        maxActions: 2,
         spacing: 'default',
-        buttonSpacing: 8,
+        buttonSpacing: 10,
         actionsOrientation: 'vertical',
         actionAlignment: 'stretch',
       },
@@ -218,10 +238,9 @@
     var buttons = root.querySelectorAll('button, .ac-pushButton, a.ac-pushButton');
     for (var i = 0; i < buttons.length; i++) {
       var btn = buttons[i];
-      var label = (btn.textContent || '').trim().toLowerCase();
       var isPrimary =
         btn.classList.contains('style-positive') ||
-        /read full|manage|confirm|continue|submit|done|yes|book/.test(label) ||
+        /read full|view|open|manage|confirm|continue/i.test(btn.textContent || '') ||
         i === 0;
       btn.classList.remove('scout-ac-btn-primary', 'scout-ac-btn-secondary');
       btn.classList.add(isPrimary ? 'scout-ac-btn-primary' : 'scout-ac-btn-secondary');
@@ -232,7 +251,6 @@
         btn.style.setProperty('border', '2px solid ' + T.green, 'important');
       } else {
         btn.style.setProperty('background', 'transparent', 'important');
-        btn.style.setProperty('background-color', 'transparent', 'important');
         btn.style.setProperty('color', T.cyan, 'important');
         btn.style.setProperty('border', '2px solid ' + T.cyan, 'important');
       }
@@ -247,17 +265,40 @@
     var containers = root.querySelectorAll('.ac-container');
     for (var i = 0; i < containers.length; i++) {
       var el = containers[i];
-      var bg = (el.style && el.style.backgroundColor) || '';
-      var cs = getComputedStyle(el).backgroundColor || '';
+      var bg = (el.style && el.style.backgroundColor) || getComputedStyle(el).backgroundColor || '';
       var isGreen =
-        /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(bg) ||
-        /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(cs) ||
-        /#006643/i.test(bg);
+        /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(bg) || /#006643/i.test(bg);
       if (!isGreen) continue;
+      el.style.setProperty('padding', '20px 16px 16px', 'important');
+      el.style.setProperty('text-align', 'center', 'important');
       var texts = el.querySelectorAll('.ac-textBlock, p, span');
       for (var j = 0; j < texts.length; j++) {
         texts[j].style.setProperty('color', '#FFFFFF', 'important');
+        texts[j].style.setProperty('text-align', 'center', 'important');
       }
+    }
+  }
+
+  function normalizeUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    var u = url.trim();
+    if (!u || u === '#' || u === 'about:blank') return null;
+    if (/^\/\//.test(u)) u = 'https:' + u;
+    if (!/^https?:\/\//i.test(u)) {
+      if (/^faq\.flyfrontier\.com/i.test(u) || /^www\.flyfrontier\.com/i.test(u)) {
+        u = 'https://' + u;
+      } else if (u.charAt(0) === '/') {
+        u = 'https://faq.flyfrontier.com' + u;
+      } else {
+        return null;
+      }
+    }
+    try {
+      var parsed = new URL(u);
+      if (!parsed.hostname) return null;
+      return parsed.href;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -281,8 +322,9 @@
     } catch (e2) {
       /* ignore */
     }
-    if (url && typeof url === 'string' && /^https?:\/\//i.test(url)) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    var safe = normalizeUrl(url);
+    if (safe) {
+      window.open(safe, '_blank', 'noopener,noreferrer');
       return;
     }
 
@@ -294,19 +336,16 @@
       data = null;
     }
 
-    if (typeof onSendMessage === 'function') {
+    // Only Submit-style actions with real user intent (no more_faq noise)
+    if (typeof onSendMessage === 'function' && data && data.action && data.action !== 'more_faq') {
       var title = '';
       try {
         title = action.title || (action.getTitle && action.getTitle()) || '';
       } catch (e4) {
         title = '';
       }
-      var text = title || (data && data.action) || 'Card action';
-      onSendMessage(String(text), {
-        adaptivecards: data || {},
-        _cognigy: {
-          _plugin: { type: 'adaptivecards', data: data || {} },
-        },
+      onSendMessage(String(title || data.action), {
+        adaptivecards: data,
       });
     }
   }
