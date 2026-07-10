@@ -24,13 +24,28 @@
     // Montserrat everywhere
     '[data-cognigy-webchat-root] * { font-family: "Montserrat", sans-serif !important; }',
     '[data-cognigy-webchat-root] .regular-message { font-size: 14px; line-height: 1.5; }',
-    // Header title: single line, never wrap "Airlines" onto a second row
-    '[data-cognigy-webchat-root] .webchat-header-title { font-weight: 600; letter-spacing: 0.01em; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: 13px !important; max-width: 100%; }',
-    '[data-cognigy-webchat-root] .webchat-header-logo-name-container { flex: 1 1 auto !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 8px !important; max-width: calc(100% - 96px) !important; align-items: center !important; }',
-    '[data-cognigy-webchat-root] .webchat-header-logo-name-container > div { min-width: 0 !important; overflow: hidden !important; }',
+    // Header title: single line — never wrap "Airlines" onto a second row
+    '[data-cognigy-webchat-root] .webchat-header-title,',
+    '[data-cognigy-webchat-root] .webchat-header-bar h1,',
+    '[data-cognigy-webchat-root] .webchat-header-bar h2,',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container span,',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container p {',
+    '  font-weight: 600 !important; letter-spacing: 0.01em; white-space: nowrap !important;',
+    '  overflow: hidden !important; text-overflow: ellipsis !important;',
+    '  font-size: 13px !important; line-height: 1.2 !important; max-width: 100% !important;',
+    '  display: block !important;',
+    '}',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container {',
+    '  flex: 1 1 auto !important; min-width: 0 !important; margin-left: 0 !important;',
+    '  margin-right: 8px !important; max-width: calc(100% - 96px) !important;',
+    '  align-items: center !important; overflow: hidden !important;',
+    '}',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container > div {',
+    '  min-width: 0 !important; overflow: hidden !important; flex: 1 1 auto !important;',
+    '}',
 
     // Header — left-justify logo + title, fixed logo size
-    '[data-cognigy-webchat-root] .webchat-header-bar { justify-content: flex-start !important; gap: 8px !important; }',
+    '[data-cognigy-webchat-root] .webchat-header-bar { justify-content: flex-start !important; gap: 8px !important; flex-wrap: nowrap !important; }',
     '[data-cognigy-webchat-root] .webchat-header-logo-name-container img, [data-cognigy-webchat-root] .webchat-header-logo { width: 32px !important; height: 32px !important; flex-shrink: 0 !important; object-fit: contain !important; }',
 
     // Hide Cognigy watermark
