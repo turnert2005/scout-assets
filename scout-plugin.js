@@ -24,12 +24,14 @@
     // Montserrat everywhere
     '[data-cognigy-webchat-root] * { font-family: "Montserrat", sans-serif !important; }',
     '[data-cognigy-webchat-root] .regular-message { font-size: 14px; line-height: 1.5; }',
-    '[data-cognigy-webchat-root] .webchat-header-title { font-weight: 600; letter-spacing: 0.02em; }',
+    // Header title: single line, never wrap "Airlines" onto a second row
+    '[data-cognigy-webchat-root] .webchat-header-title { font-weight: 600; letter-spacing: 0.01em; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: 13px !important; max-width: 100%; }',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container { flex: 1 1 auto !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 8px !important; max-width: calc(100% - 96px) !important; align-items: center !important; }',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container > div { min-width: 0 !important; overflow: hidden !important; }',
 
-    // Header — left-justify logo + title, larger logo
-    '[data-cognigy-webchat-root] .webchat-header-bar { justify-content: flex-start !important; }',
-    '[data-cognigy-webchat-root] .webchat-header-logo-name-container { flex: 0 1 auto !important; margin-left: 0 !important; margin-right: auto !important; }',
-    '[data-cognigy-webchat-root] .webchat-header-logo-name-container img { width: 36px !important; height: 36px !important; object-fit: contain !important; }',
+    // Header — left-justify logo + title, fixed logo size
+    '[data-cognigy-webchat-root] .webchat-header-bar { justify-content: flex-start !important; gap: 8px !important; }',
+    '[data-cognigy-webchat-root] .webchat-header-logo-name-container img, [data-cognigy-webchat-root] .webchat-header-logo { width: 32px !important; height: 32px !important; flex-shrink: 0 !important; object-fit: contain !important; }',
 
     // Hide Cognigy watermark
     '[data-cognigy-webchat-root] .webchat-branding-link,',
