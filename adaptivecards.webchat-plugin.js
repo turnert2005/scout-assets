@@ -280,22 +280,33 @@
   }
 
   function normalizeUrl(url) {
+    // Never invent destinations. Only open real absolute https URLs on Frontier hosts.
     if (!url || typeof url !== 'string') return null;
     var u = url.trim();
     if (!u || u === '#' || u === 'about:blank') return null;
     if (/^\/\//.test(u)) u = 'https:' + u;
     if (!/^https?:\/\//i.test(u)) {
-      if (/^faq\.flyfrontier\.com/i.test(u) || /^www\.flyfrontier\.com/i.test(u)) {
+      // Allow host-only strings that already name a Frontier host; never invent paths.
+      if (/^(faq\.|www\.)?flyfrontier\.com\//i.test(u)) {
         u = 'https://' + u;
-      } else if (u.charAt(0) === '/') {
-        u = 'https://faq.flyfrontier.com' + u;
       } else {
         return null;
       }
     }
     try {
       var parsed = new URL(u);
-      if (!parsed.hostname) return null;
+      var host = (parsed.hostname || '').toLowerCase();
+      if (host !== 'www.flyfrontier.com' && host !== 'flyfrontier.com' && host !== 'faq.flyfrontier.com') {
+        return null;
+      }
+      // KnowledgeOwl /hc/ deep links frequently blank/404 — do not open
+      if (host === 'faq.flyfrontier.com' && /\/hc\//i.test(parsed.pathname || '')) {
+        return null;
+      }
+      // Bare homepage is not a useful policy target
+      if ((parsed.pathname || '/') === '/' || (parsed.pathname || '') === '') {
+        return null;
+      }
       return parsed.href;
     } catch (e) {
       return null;
