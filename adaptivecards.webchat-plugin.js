@@ -1,12 +1,12 @@
 /**
- * Scout Adaptive Cards — Frontier 2026 brand showcase Webchat v3 plugin
+ * Scout Adaptive Cards — Webchat v3 message plugin
  *
- * Official core palette (Brand Guide 2026):
- *   Frontier Green #00472C | Tropic #92DD2F | Alpine #DAFFD7
- *   Taiga #002600 | Cloud #FAFFFA | Near-Black #16171A
- *
- * Digital type: Plus Jakarta Sans (brand secondary for web/app;
- * Ginka / TT Commons Pro are licensed desktop fonts).
+ * Visual system aligned to Scout xApps (assets/css/frontier-tokens.css +
+ * xapp-system.css):
+ *   Primary Green #006643 | Cyan #00ACEC | Surfaces white / F8FAFB
+ *   Text #1A1A1A / #576E77 | Montserrat | radius-lg 12px | green-tinted shadows
+ *   Primary buttons = solid Frontier green (scout-btn-primary)
+ *   Secondary buttons = cyan outline (scout-btn-secondary)
  *
  * Match: adaptivecards (official) + adaptivecard (Scout legacy)
  */
@@ -16,19 +16,32 @@
   var SDK_URL =
     'https://cdn.jsdelivr.net/npm/adaptivecards@3.0.5/dist/adaptivecards.min.js';
   var FONT_URL =
-    'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap';
+    'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap';
   var sdkLoading = null;
   var stylesInjected = false;
 
-  var BRAND = {
-    green: '#00472C',
-    tropic: '#92DD2F',
-    alpine: '#DAFFD7',
-    taiga: '#002600',
-    cloud: '#FAFFFA',
-    nearBlack: '#16171A',
-    gray: '#808186',
-    white: '#FFFFFF',
+  // Mirror assets/css/frontier-tokens.css (xApp system)
+  var T = {
+    green: '#006643',
+    greenHover: '#005538',
+    cyan: '#00ACEC',
+    cyanSoft: 'rgba(0,172,236,0.08)',
+    grayDark: '#4C4C4C',
+    grayMid: '#9A9A9A',
+    grayLight: '#E8E8E8',
+    grayBlue: '#576E77',
+    surface: '#FFFFFF',
+    surfaceSecondary: '#F8FAFB',
+    surfaceGreenTint: 'rgba(0,102,67,0.04)',
+    text: '#1A1A1A',
+    textInverse: '#FFFFFF',
+    radiusLg: '12px',
+    radiusMd: '8px',
+    radiusXl: '16px',
+    shadowMd: '0 2px 8px rgba(0,102,67,0.08)',
+    shadowLg: '0 4px 16px rgba(0,102,67,0.10)',
+    shadowSm: '0 1px 2px rgba(0,102,67,0.06)',
+    focusRing: '0 0 0 3px rgba(0,172,236,0.4)',
   };
 
   function injectStyles() {
@@ -43,57 +56,61 @@
       document.head.appendChild(font);
     }
 
+    // Replace prior style block if hot-reloaded
+    var old = document.querySelector('style[data-scout-adaptivecards]');
+    if (old) old.parentNode.removeChild(old);
+
     var css = [
-      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(2px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }',
-      '@keyframes scoutAcShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }',
-      '@keyframes scoutAcPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(146,221,47,0.45); } 50% { box-shadow: 0 0 0 6px rgba(146,221,47,0); } }',
-      '@keyframes scoutAcGlow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }',
-      '@keyframes scoutAcPlane { 0% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 100% { transform: translateX(-6px); } }',
+      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }',
 
-      '.scout-ac-shell { font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 392px; margin: 8px 0 14px; animation: scoutAcIn 0.55s cubic-bezier(0.22,1,0.36,1) both; }',
-      '.scout-ac-shell .scout-ac-frame { border-radius: 20px; overflow: hidden; background: linear-gradient(160deg, ' + BRAND.cloud + ' 0%, ' + BRAND.alpine + ' 55%, #c8f5c4 100%); border: 1px solid rgba(0,71,44,0.16); box-shadow: 0 18px 40px rgba(0,71,44,0.16), 0 4px 12px rgba(0,38,0,0.06), inset 0 1px 0 rgba(255,255,255,0.75); position: relative; }',
-      '.scout-ac-shell .scout-ac-frame::before { content: ""; display: block; height: 5px; background: linear-gradient(90deg, ' + BRAND.green + ' 0%, ' + BRAND.tropic + ' 40%, ' + BRAND.green + ' 70%, ' + BRAND.tropic + ' 100%); background-size: 220% 100%; animation: scoutAcShimmer 3.6s linear infinite; }',
-      '.scout-ac-shell .scout-ac-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 60% at 100% 0%, rgba(146,221,47,0.18) 0%, transparent 55%); animation: scoutAcGlow 5s ease-in-out infinite; }',
+      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 380px; margin: 6px 0 12px; animation: scoutAcIn 0.3s cubic-bezier(0.4,0,0.2,1) both; }',
 
-      '.scout-ac-shell .scout-ac-badge { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 2px; position: relative; z-index: 1; }',
-      '.scout-ac-shell .scout-ac-badge-left { display: flex; align-items: center; gap: 10px; }',
-      '.scout-ac-shell .scout-ac-mark { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(145deg, ' + BRAND.green + ' 0%, ' + BRAND.taiga + ' 100%); color: ' + BRAND.tropic + '; font-weight: 800; font-size: 13px; letter-spacing: -0.02em; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,71,44,0.35), inset 0 1px 0 rgba(146,221,47,0.35); animation: scoutAcPulse 2.8s ease-in-out infinite; }',
-      '.scout-ac-shell .scout-ac-badge-text { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: ' + BRAND.green + '; }',
-      '.scout-ac-shell .scout-ac-badge-sub { font-size: 10px; font-weight: 600; color: ' + BRAND.gray + '; letter-spacing: 0.02em; }',
-      '.scout-ac-shell .scout-ac-chip { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: ' + BRAND.taiga + '; background: ' + BRAND.tropic + '; border-radius: 999px; padding: 4px 8px; box-shadow: 0 2px 6px rgba(146,221,47,0.45); }',
+      /* Frame matches xApp card surfaces: white, soft green shadow, 16px radius */
+      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid ' + T.grayLight + '; box-shadow: ' + T.shadowLg + '; position: relative; }',
 
-      '.scout-ac-shell .scout-ac-host { padding: 2px 4px 12px; position: relative; z-index: 1; }',
-      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: "Plus Jakarta Sans", sans-serif !important; padding: 0 8px 4px !important; }',
-      '.scout-ac-shell .ac-textBlock { font-family: "Plus Jakarta Sans", sans-serif !important; color: ' + BRAND.nearBlack + ' !important; line-height: 1.4 !important; }',
-      '.scout-ac-shell .ac-container { border-radius: 14px !important; }',
-      '.scout-ac-shell .ac-container.ac-selectable:hover { filter: brightness(1.02); }',
+      /* Header bar = xApp kb-header / green→cyan gradient */
+      '.scout-ac-shell .scout-ac-chrome { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; background: linear-gradient(135deg, ' + T.green + ' 0%, #00836E 55%, ' + T.cyan + ' 100%); color: ' + T.textInverse + '; }',
+      '.scout-ac-shell .scout-ac-chrome-left { display: flex; align-items: center; gap: 10px; min-width: 0; }',
+      '.scout-ac-shell .scout-ac-mark { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.16); color: ' + T.textInverse + '; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(255,255,255,0.35); flex-shrink: 0; }',
+      '.scout-ac-shell .scout-ac-chrome-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; }',
+      '.scout-ac-shell .scout-ac-chrome-sub { font-size: 11px; font-weight: 500; opacity: 0.88; line-height: 1.2; margin-top: 2px; }',
+      '.scout-ac-shell .scout-ac-chip { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: ' + T.green + '; background: ' + T.textInverse + '; border-radius: 9999px; padding: 4px 8px; flex-shrink: 0; }',
 
-      /* Buttons: Adaptive Cards often paints inline styles — CSS alone is not enough.
-         Primary/default look is enforced in brandButtons() after render. */
-      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button { border-radius: 12px !important; font-family: "Plus Jakarta Sans", sans-serif !important; font-weight: 800 !important; font-size: 13px !important; letter-spacing: 0.01em !important; cursor: pointer !important; min-height: 44px !important; transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease !important; }',
-      '.scout-ac-shell button.scout-ac-btn-primary { background: linear-gradient(135deg, ' + BRAND.tropic + ' 0%, #7bc922 55%, #6bb01c 100%) !important; background-color: ' + BRAND.tropic + ' !important; color: ' + BRAND.taiga + ' !important; border: none !important; box-shadow: 0 8px 18px rgba(146,221,47,0.45), inset 0 1px 0 rgba(255,255,255,0.4) !important; }',
-      '.scout-ac-shell button.scout-ac-btn-primary:hover { transform: translateY(-2px) !important; filter: brightness(1.04) !important; box-shadow: 0 12px 24px rgba(146,221,47,0.55), inset 0 1px 0 rgba(255,255,255,0.45) !important; }',
-      '.scout-ac-shell button.scout-ac-btn-secondary { background: ' + BRAND.cloud + ' !important; background-color: ' + BRAND.cloud + ' !important; color: ' + BRAND.green + ' !important; border: 2px solid ' + BRAND.green + ' !important; box-shadow: 0 2px 8px rgba(0,71,44,0.08) !important; }',
-      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + BRAND.alpine + ' !important; background-color: ' + BRAND.alpine + ' !important; transform: translateY(-1px) !important; }',
+      '.scout-ac-shell .scout-ac-host { padding: 4px 6px 12px; background: ' + T.surfaceSecondary + '; }',
+      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 4px 6px 2px !important; }',
+      '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; color: ' + T.text + ' !important; line-height: 1.5 !important; }',
+      '.scout-ac-shell .ac-container { border-radius: ' + T.radiusLg + ' !important; }',
 
-      '.scout-ac-shell .ac-fact-title { color: ' + BRAND.gray + ' !important; font-weight: 700 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; }',
-      '.scout-ac-shell .ac-fact-value { color: ' + BRAND.taiga + ' !important; font-weight: 800 !important; font-size: 14px !important; }',
-      '.scout-ac-shell .ac-horizontal-separator { border-top-color: rgba(0,71,44,0.14) !important; }',
-      '.scout-ac-shell .ac-input { border-radius: 10px !important; border: 1.5px solid rgba(0,71,44,0.2) !important; font-family: "Plus Jakarta Sans", sans-serif !important; }',
-      '.scout-ac-shell .ac-input:focus { border-color: ' + BRAND.green + ' !important; outline: 2px solid rgba(146,221,47,0.35) !important; }',
+      /* Action set: stack like xApp footers */
+      '.scout-ac-shell .ac-actionSet { gap: 8px !important; }',
 
-      /* Emphasis (green) headers inside Adaptive Cards */
-      '.scout-ac-shell .ac-container[style*="background-color: #' + BRAND.green.replace('#', '') + '"], .scout-ac-shell .ac-container[style*="background-color: rgb(0, 71, 44)"] { position: relative; }',
+      /* Base button = .scout-btn */
+      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 44px !important; padding: 12px 24px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; }',
+      '.scout-ac-shell .ac-pushButton:focus-visible, .scout-ac-shell .ac-actionSet button:focus-visible { box-shadow: ' + T.focusRing + ' !important; }',
 
-      '.scout-ac-error { padding: 14px 16px; font-size: 13px; color: ' + BRAND.gray + '; font-family: "Plus Jakarta Sans", sans-serif; }',
-      '.scout-ac-loading { padding: 22px 16px; font-size: 11px; font-weight: 800; color: ' + BRAND.green + '; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }',
-      '.scout-ac-loading::before { content: "✈"; animation: scoutAcPlane 1.2s ease-in-out infinite; color: ' + BRAND.tropic + '; filter: drop-shadow(0 0 4px rgba(146,221,47,0.6)); }',
+      /* Primary = scout-btn-primary (Frontier green solid) */
+      '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive { background: ' + T.green + ' !important; background-color: ' + T.green + ' !important; color: ' + T.textInverse + ' !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary:hover, .scout-ac-shell .ac-pushButton.style-positive:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; box-shadow: ' + T.shadowMd + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary:active { transform: scale(0.98) !important; }',
 
-      /* Boarding-pass notch aesthetic for booking variant */
-      '.scout-ac-shell[data-variant="booking"] .scout-ac-frame { background: linear-gradient(165deg, ' + BRAND.cloud + ' 0%, #ffffff 40%, ' + BRAND.alpine + ' 100%); }',
-      '.scout-ac-shell[data-variant="booking"] .scout-ac-host { position: relative; }',
-      '.scout-ac-shell[data-variant="booking"] .scout-ac-host::before { content: ""; position: absolute; left: -6px; top: 42%; width: 14px; height: 14px; border-radius: 50%; background: #e8f0ec; box-shadow: inset 0 0 0 1px rgba(0,71,44,0.12); z-index: 2; }',
-      '.scout-ac-shell[data-variant="booking"] .scout-ac-host::after { content: ""; position: absolute; right: -6px; top: 42%; width: 14px; height: 14px; border-radius: 50%; background: #e8f0ec; box-shadow: inset 0 0 0 1px rgba(0,71,44,0.12); z-index: 2; }',
+      /* Secondary = scout-btn-secondary (cyan outline) */
+      '.scout-ac-shell button.scout-ac-btn-secondary { background: transparent !important; background-color: transparent !important; color: ' + T.cyan + ' !important; border: 2px solid ' + T.cyan + ' !important; box-shadow: none !important; }',
+      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; background-color: ' + T.cyanSoft + ' !important; box-shadow: ' + T.shadowSm + ' !important; }',
+
+      /* ShowCard expanded region */
+      '.scout-ac-shell .ac-adaptiveCard .ac-container { }',
+
+      '.scout-ac-shell .ac-fact-title { color: ' + T.grayBlue + ' !important; font-weight: 600 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }',
+      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 700 !important; font-size: 14px !important; }',
+      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; }',
+      '.scout-ac-shell .ac-input { border-radius: ' + T.radiusMd + ' !important; border: 1.5px solid ' + T.grayLight + ' !important; font-family: Montserrat, sans-serif !important; }',
+      '.scout-ac-shell .ac-input:focus { border-color: ' + T.cyan + ' !important; outline: none !important; box-shadow: ' + T.focusRing + ' !important; }',
+
+      '.scout-ac-error { padding: 14px 16px; font-size: 13px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; background: ' + T.surfaceSecondary + '; }',
+      '.scout-ac-loading { padding: 18px 16px; font-size: 12px; font-weight: 600; color: ' + T.green + '; letter-spacing: 0.04em; font-family: Montserrat, sans-serif; background: ' + T.surfaceSecondary + '; }',
+
+      /* Links inside cards */
+      '.scout-ac-shell a { color: ' + T.cyan + ' !important; font-weight: 600; }',
     ].join('\n');
 
     var el = document.createElement('style');
@@ -123,97 +140,85 @@
 
   function frontierHostConfig(AdaptiveCards) {
     return new AdaptiveCards.HostConfig({
-      fontFamily: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontFamily: 'Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       fontSizes: {
         small: 12,
         default: 14,
         medium: 16,
-        large: 20,
-        extraLarge: 30,
+        large: 18,
+        extraLarge: 24,
       },
       fontWeights: {
         lighter: 400,
         default: 500,
-        bolder: 800,
+        bolder: 700,
       },
       spacing: {
         small: 6,
         default: 10,
         medium: 14,
-        large: 18,
-        extraLarge: 26,
+        large: 16,
+        extraLarge: 24,
         padding: 14,
       },
       separator: {
         lineThickness: 1,
-        lineColor: 'rgba(0,71,44,0.14)',
+        lineColor: T.grayLight,
       },
       containerStyles: {
         default: {
           backgroundColor: '#FFFFFF00',
           foregroundColors: {
-            default: { default: BRAND.nearBlack, subtle: BRAND.gray },
-            accent: { default: BRAND.green, subtle: '#1a6b45' },
-            good: { default: BRAND.green, subtle: '#1a6b45' },
-            warning: { default: '#8A6D00', subtle: '#B8860B' },
-            attention: { default: '#8B1E1E', subtle: '#C45C5C' },
-            dark: { default: BRAND.taiga, subtle: BRAND.gray },
-            light: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.82)' },
+            default: { default: T.text, subtle: T.grayBlue },
+            accent: { default: T.cyan, subtle: '#4DC8F6' },
+            good: { default: T.green, subtle: '#33826A' },
+            warning: { default: '#E0B774', subtle: '#C9A05E' },
+            attention: { default: '#BD696A', subtle: '#a85a5b' },
+            dark: { default: T.text, subtle: T.grayBlue },
+            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
           },
         },
         emphasis: {
-          backgroundColor: BRAND.green,
+          backgroundColor: T.green,
           foregroundColors: {
-            default: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.85)' },
-            accent: { default: BRAND.tropic, subtle: '#b8f06a' },
-            good: { default: BRAND.tropic, subtle: '#b8f06a' },
+            default: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
+            accent: { default: T.cyan, subtle: '#A8E4F8' },
+            good: { default: '#B8F0D0', subtle: '#8FDBB0' },
             warning: { default: '#FFE08A', subtle: '#FFD45C' },
             attention: { default: '#FFB4B4', subtle: '#FF8F8F' },
-            dark: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.8)' },
-            light: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.85)' },
+            dark: { default: T.textInverse, subtle: 'rgba(255,255,255,0.8)' },
+            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
           },
         },
         accent: {
-          backgroundColor: BRAND.alpine,
+          backgroundColor: 'rgba(0,172,236,0.10)',
           foregroundColors: {
-            default: { default: BRAND.taiga, subtle: BRAND.green },
-            accent: { default: BRAND.green, subtle: '#1a6b45' },
-            good: { default: BRAND.green, subtle: '#1a6b45' },
-            warning: { default: '#8A6D00', subtle: '#B8860B' },
-            attention: { default: '#8B1E1E', subtle: '#C45C5C' },
-            dark: { default: BRAND.taiga, subtle: BRAND.gray },
-            light: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.85)' },
+            default: { default: T.text, subtle: T.grayBlue },
+            accent: { default: T.cyan, subtle: '#0090C7' },
+            good: { default: T.green, subtle: '#33826A' },
+            warning: { default: '#B8860B', subtle: '#D4A84B' },
+            attention: { default: '#BD696A', subtle: '#a85a5b' },
+            dark: { default: T.text, subtle: T.grayBlue },
+            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
           },
         },
         good: {
-          backgroundColor: BRAND.alpine,
+          backgroundColor: 'rgba(0,102,67,0.06)',
           foregroundColors: {
-            default: { default: BRAND.green, subtle: '#1a6b45' },
-            accent: { default: BRAND.green, subtle: '#1a6b45' },
-            good: { default: BRAND.green, subtle: '#1a6b45' },
-            warning: { default: '#8A6D00', subtle: '#B8860B' },
-            attention: { default: '#8B1E1E', subtle: '#C45C5C' },
-            dark: { default: BRAND.taiga, subtle: BRAND.gray },
-            light: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.85)' },
-          },
-        },
-        attention: {
-          backgroundColor: '#FFF1F1',
-          foregroundColors: {
-            default: { default: BRAND.nearBlack, subtle: BRAND.gray },
-            accent: { default: BRAND.green, subtle: '#1a6b45' },
-            good: { default: BRAND.green, subtle: '#1a6b45' },
-            warning: { default: '#8A6D00', subtle: '#B8860B' },
-            attention: { default: '#8B1E1E', subtle: '#C45C5C' },
-            dark: { default: BRAND.taiga, subtle: BRAND.gray },
-            light: { default: BRAND.cloud, subtle: 'rgba(250,255,250,0.85)' },
+            default: { default: T.green, subtle: '#33826A' },
+            accent: { default: T.cyan, subtle: '#0090C7' },
+            good: { default: T.green, subtle: '#33826A' },
+            warning: { default: '#B8860B', subtle: '#D4A84B' },
+            attention: { default: '#BD696A', subtle: '#a85a5b' },
+            dark: { default: T.text, subtle: T.grayBlue },
+            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
           },
         },
       },
       actions: {
         maxActions: 5,
         spacing: 'default',
-        buttonSpacing: 10,
+        buttonSpacing: 8,
         actionsOrientation: 'vertical',
         actionAlignment: 'stretch',
       },
@@ -237,38 +242,100 @@
     return 'default';
   }
 
-  function brandButtons(root) {
+  function styleButtons(root) {
     if (!root) return;
-    var buttons = root.querySelectorAll('button, .ac-pushButton');
+    var buttons = root.querySelectorAll('button, .ac-pushButton, a.ac-pushButton');
     for (var i = 0; i < buttons.length; i++) {
       var btn = buttons[i];
       var label = (btn.textContent || '').trim().toLowerCase();
       var isPrimary =
-        /read full|manage this booking|confirm|book|continue|submit|yes/.test(label) ||
         btn.classList.contains('style-positive') ||
-        (btn.getAttribute('aria-label') || '').toLowerCase().indexOf('positive') >= 0;
-      var isFirst = i === 0;
-      var primary = isPrimary || isFirst;
+        /read full|manage this booking|confirm|continue|submit|done|yes|book/.test(label) ||
+        i === 0;
       btn.classList.remove('scout-ac-btn-primary', 'scout-ac-btn-secondary');
-      btn.classList.add(primary ? 'scout-ac-btn-primary' : 'scout-ac-btn-secondary');
-      // Beat Adaptive Cards inline styles
-      if (primary) {
-        btn.style.setProperty('background', 'linear-gradient(135deg, #92DD2F 0%, #7bc922 55%, #6bb01c 100%)', 'important');
-        btn.style.setProperty('background-color', '#92DD2F', 'important');
-        btn.style.setProperty('color', '#002600', 'important');
-        btn.style.setProperty('border', 'none', 'important');
-        btn.style.setProperty('box-shadow', '0 8px 18px rgba(146,221,47,0.45)', 'important');
+      btn.classList.add(isPrimary ? 'scout-ac-btn-primary' : 'scout-ac-btn-secondary');
+
+      // Override Adaptive Cards inline paints without blocking clicks
+      if (isPrimary) {
+        btn.style.setProperty('background', T.green, 'important');
+        btn.style.setProperty('background-color', T.green, 'important');
+        btn.style.setProperty('color', T.textInverse, 'important');
+        btn.style.setProperty('border', '2px solid ' + T.green, 'important');
       } else {
-        btn.style.setProperty('background', '#FAFFFA', 'important');
-        btn.style.setProperty('background-color', '#FAFFFA', 'important');
-        btn.style.setProperty('color', '#00472C', 'important');
-        btn.style.setProperty('border', '2px solid #00472C', 'important');
-        btn.style.setProperty('box-shadow', '0 2px 8px rgba(0,71,44,0.08)', 'important');
+        btn.style.setProperty('background', 'transparent', 'important');
+        btn.style.setProperty('background-color', 'transparent', 'important');
+        btn.style.setProperty('color', T.cyan, 'important');
+        btn.style.setProperty('border', '2px solid ' + T.cyan, 'important');
       }
-      btn.style.setProperty('border-radius', '12px', 'important');
-      btn.style.setProperty('font-weight', '800', 'important');
-      btn.style.setProperty('min-height', '44px', 'important');
-      btn.style.setProperty('font-family', '"Plus Jakarta Sans", sans-serif', 'important');
+      btn.style.setProperty('pointer-events', 'auto', 'important');
+      btn.style.setProperty('cursor', 'pointer', 'important');
+      btn.style.setProperty('opacity', '1', 'important');
+      btn.removeAttribute('disabled');
+      if (btn.getAttribute('aria-disabled') === 'true') {
+        btn.setAttribute('aria-disabled', 'false');
+      }
+    }
+  }
+
+  /**
+   * Action handling:
+   * - OpenUrl: open in new tab (must run BEFORE getData — OpenUrl also has getData)
+   * - Submit / Execute: send chat message with action title + data
+   * - ShowCard: handled by Adaptive Cards SDK (no-op here)
+   */
+  function handleAction(action, onSendMessage) {
+    if (!action) return;
+
+    var typeName = '';
+    try {
+      typeName = (action.getJsonTypeName && action.getJsonTypeName()) || action.constructor && action.constructor.name || '';
+    } catch (e) {
+      typeName = '';
+    }
+
+    // ShowCard is expanded by the SDK; do not treat as message
+    if (/ShowCard/i.test(typeName)) return;
+
+    // OpenUrl — check url first
+    var url = null;
+    try {
+      if (action.url) url = action.url;
+      else if (typeof action.getUrl === 'function') url = action.getUrl();
+    } catch (e2) {
+      /* ignore */
+    }
+    if (url && typeof url === 'string' && /^https?:\/\//i.test(url)) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Submit / Execute / ToggleVisibility with data
+    var data = null;
+    try {
+      if (typeof action.getData === 'function') data = action.getData();
+      else if (action.data !== undefined) data = action.data;
+    } catch (e3) {
+      data = null;
+    }
+
+    if (typeof onSendMessage === 'function') {
+      var title = '';
+      try {
+        title = action.title || (action.getTitle && action.getTitle()) || '';
+      } catch (e4) {
+        title = '';
+      }
+      // Prefer human-readable title so the bot receives a normal utterance
+      var text = title || (data && data.action) || 'Card action';
+      onSendMessage(String(text), {
+        adaptivecards: data || {},
+        _cognigy: {
+          _plugin: {
+            type: 'adaptivecards',
+            data: data || {},
+          },
+        },
+      });
     }
   }
 
@@ -312,37 +379,22 @@
             try {
               var card = new AdaptiveCards.AdaptiveCard();
               card.hostConfig = frontierHostConfig(AdaptiveCards);
-              if (typeof props.onSendMessage === 'function') {
-                card.onExecuteAction = function (action) {
-                  try {
-                    if (action && action.getData) {
-                      props.onSendMessage('', {
-                        adaptivecards: action.getData(),
-                      });
-                    } else if (action && action.url) {
-                      window.open(action.url, '_blank', 'noopener,noreferrer');
-                    }
-                  } catch (e) {
-                    /* ignore */
-                  }
-                };
-              }
+              card.onExecuteAction = function (action) {
+                handleAction(action, props.onSendMessage);
+              };
               card.parse(payload);
               var rendered = card.render();
               hostRef.current.innerHTML = '';
               if (rendered) {
                 hostRef.current.appendChild(rendered);
-                brandButtons(hostRef.current);
-                // Re-brand after ShowCard expands
-                hostRef.current.addEventListener(
-                  'click',
-                  function () {
-                    setTimeout(function () {
-                      brandButtons(hostRef.current);
-                    }, 50);
-                  },
-                  true
-                );
+                styleButtons(hostRef.current);
+                // Restyle after ShowCard expands (bubble, non-capturing)
+                hostRef.current.addEventListener('click', function (ev) {
+                  // Do not stop propagation — AC needs the click
+                  setTimeout(function () {
+                    if (hostRef.current) styleButtons(hostRef.current);
+                  }, 0);
+                });
               }
               setStatus('ready');
             } catch (e) {
@@ -362,39 +414,34 @@
       [payload]
     );
 
+    var chromeLabel =
+      variant === 'booking'
+        ? 'Booking'
+        : variant === 'faq'
+          ? 'Official FAQ'
+          : 'Scout card';
+
     var frameChildren = [
       createElement(
         'div',
-        { className: 'scout-ac-badge', key: 'badge' },
+        { className: 'scout-ac-chrome', key: 'chrome' },
         createElement(
           'div',
-          { className: 'scout-ac-badge-left' },
+          { className: 'scout-ac-chrome-left' },
           createElement('div', { className: 'scout-ac-mark' }, 'F'),
           createElement(
             'div',
             null,
-            createElement(
-              'div',
-              { className: 'scout-ac-badge-text' },
-              'Frontier Scout'
-            ),
-            createElement(
-              'div',
-              { className: 'scout-ac-badge-sub' },
-              'The Sky is for Everyone'
-            )
+            createElement('div', { className: 'scout-ac-chrome-title' }, 'Frontier Scout'),
+            createElement('div', { className: 'scout-ac-chrome-sub' }, chromeLabel)
           )
         ),
-        createElement('div', { className: 'scout-ac-chip' }, 'Live')
+        createElement('div', { className: 'scout-ac-chip' }, 'Scout')
       ),
     ];
     if (status === 'loading') {
       frameChildren.push(
-        createElement(
-          'div',
-          { className: 'scout-ac-loading', key: 'load' },
-          'Building your card'
-        )
+        createElement('div', { className: 'scout-ac-loading', key: 'load' }, 'Loading…')
       );
     }
     if (status === 'error') {
@@ -436,8 +483,6 @@
     window.cognigyWebchatMessagePlugins.push(plugin);
   }
 
-  // No manual inject helpers. Cards render only when Cognigy emits
-  // message data._plugin { type: adaptivecard|adaptivecards, payload }.
   register('adaptivecards');
   register('adaptivecard');
 })();
