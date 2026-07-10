@@ -68,17 +68,13 @@
       '.scout-ac-shell .ac-container { border-radius: 14px !important; }',
       '.scout-ac-shell .ac-container.ac-selectable:hover { filter: brightness(1.02); }',
 
-      /* Primary CTA — Tropic on dark green gravity */
-      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button { background: linear-gradient(135deg, ' + BRAND.tropic + ' 0%, #7bc922 100%) !important; color: ' + BRAND.taiga + ' !important; border: none !important; border-radius: 12px !important; padding: 12px 16px !important; font-family: "Plus Jakarta Sans", sans-serif !important; font-weight: 800 !important; font-size: 13px !important; letter-spacing: 0.01em !important; cursor: pointer !important; box-shadow: 0 6px 16px rgba(146,221,47,0.4), inset 0 1px 0 rgba(255,255,255,0.35) !important; transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease !important; min-height: 44px !important; }',
-      '.scout-ac-shell .ac-pushButton:hover, .scout-ac-shell .ac-actionSet button:hover { transform: translateY(-2px) !important; box-shadow: 0 10px 22px rgba(146,221,47,0.5), inset 0 1px 0 rgba(255,255,255,0.4) !important; filter: brightness(1.03) !important; }',
-      '.scout-ac-shell .ac-pushButton:active, .scout-ac-shell .ac-actionSet button:active { transform: translateY(0) !important; }',
-
-      /* Secondary / default actions */
-      '.scout-ac-shell .ac-actionSet button.style-default, .scout-ac-shell button.ac-pushButton.style-default { background: transparent !important; color: ' + BRAND.green + ' !important; border: 2px solid ' + BRAND.green + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell .ac-actionSet button.style-default:hover, .scout-ac-shell button.ac-pushButton.style-default:hover { background: rgba(0,71,44,0.06) !important; box-shadow: none !important; }',
-
-      /* Destructive-style rare */
-      '.scout-ac-shell .ac-actionSet button.style-destructive { background: ' + BRAND.taiga + ' !important; color: ' + BRAND.cloud + ' !important; }',
+      /* Buttons: Adaptive Cards often paints inline styles — CSS alone is not enough.
+         Primary/default look is enforced in brandButtons() after render. */
+      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button { border-radius: 12px !important; font-family: "Plus Jakarta Sans", sans-serif !important; font-weight: 800 !important; font-size: 13px !important; letter-spacing: 0.01em !important; cursor: pointer !important; min-height: 44px !important; transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary { background: linear-gradient(135deg, ' + BRAND.tropic + ' 0%, #7bc922 55%, #6bb01c 100%) !important; background-color: ' + BRAND.tropic + ' !important; color: ' + BRAND.taiga + ' !important; border: none !important; box-shadow: 0 8px 18px rgba(146,221,47,0.45), inset 0 1px 0 rgba(255,255,255,0.4) !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary:hover { transform: translateY(-2px) !important; filter: brightness(1.04) !important; box-shadow: 0 12px 24px rgba(146,221,47,0.55), inset 0 1px 0 rgba(255,255,255,0.45) !important; }',
+      '.scout-ac-shell button.scout-ac-btn-secondary { background: ' + BRAND.cloud + ' !important; background-color: ' + BRAND.cloud + ' !important; color: ' + BRAND.green + ' !important; border: 2px solid ' + BRAND.green + ' !important; box-shadow: 0 2px 8px rgba(0,71,44,0.08) !important; }',
+      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + BRAND.alpine + ' !important; background-color: ' + BRAND.alpine + ' !important; transform: translateY(-1px) !important; }',
 
       '.scout-ac-shell .ac-fact-title { color: ' + BRAND.gray + ' !important; font-weight: 700 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; }',
       '.scout-ac-shell .ac-fact-value { color: ' + BRAND.taiga + ' !important; font-weight: 800 !important; font-size: 14px !important; }',
@@ -241,6 +237,41 @@
     return 'default';
   }
 
+  function brandButtons(root) {
+    if (!root) return;
+    var buttons = root.querySelectorAll('button, .ac-pushButton');
+    for (var i = 0; i < buttons.length; i++) {
+      var btn = buttons[i];
+      var label = (btn.textContent || '').trim().toLowerCase();
+      var isPrimary =
+        /read full|manage this booking|confirm|book|continue|submit|yes/.test(label) ||
+        btn.classList.contains('style-positive') ||
+        (btn.getAttribute('aria-label') || '').toLowerCase().indexOf('positive') >= 0;
+      var isFirst = i === 0;
+      var primary = isPrimary || isFirst;
+      btn.classList.remove('scout-ac-btn-primary', 'scout-ac-btn-secondary');
+      btn.classList.add(primary ? 'scout-ac-btn-primary' : 'scout-ac-btn-secondary');
+      // Beat Adaptive Cards inline styles
+      if (primary) {
+        btn.style.setProperty('background', 'linear-gradient(135deg, #92DD2F 0%, #7bc922 55%, #6bb01c 100%)', 'important');
+        btn.style.setProperty('background-color', '#92DD2F', 'important');
+        btn.style.setProperty('color', '#002600', 'important');
+        btn.style.setProperty('border', 'none', 'important');
+        btn.style.setProperty('box-shadow', '0 8px 18px rgba(146,221,47,0.45)', 'important');
+      } else {
+        btn.style.setProperty('background', '#FAFFFA', 'important');
+        btn.style.setProperty('background-color', '#FAFFFA', 'important');
+        btn.style.setProperty('color', '#00472C', 'important');
+        btn.style.setProperty('border', '2px solid #00472C', 'important');
+        btn.style.setProperty('box-shadow', '0 2px 8px rgba(0,71,44,0.08)', 'important');
+      }
+      btn.style.setProperty('border-radius', '12px', 'important');
+      btn.style.setProperty('font-weight', '800', 'important');
+      btn.style.setProperty('min-height', '44px', 'important');
+      btn.style.setProperty('font-family', '"Plus Jakarta Sans", sans-serif', 'important');
+    }
+  }
+
   function AdaptiveCardComponent(props) {
     var React =
       (window.__COGNIGY_WEBCHAT && window.__COGNIGY_WEBCHAT.React) ||
@@ -299,7 +330,20 @@
               card.parse(payload);
               var rendered = card.render();
               hostRef.current.innerHTML = '';
-              if (rendered) hostRef.current.appendChild(rendered);
+              if (rendered) {
+                hostRef.current.appendChild(rendered);
+                brandButtons(hostRef.current);
+                // Re-brand after ShowCard expands
+                hostRef.current.addEventListener(
+                  'click',
+                  function () {
+                    setTimeout(function () {
+                      brandButtons(hostRef.current);
+                    }, 50);
+                  },
+                  true
+                );
+              }
               setStatus('ready');
             } catch (e) {
               setStatus('error');
@@ -418,7 +462,18 @@
         '<div class="scout-ac-badge-sub">The Sky is for Everyone</div></div>' +
         '</div><div class="scout-ac-chip">Live</div></div>' +
         '<div class="scout-ac-host"></div></div>';
-      shell.querySelector('.scout-ac-host').appendChild(rendered);
+      var host = shell.querySelector('.scout-ac-host');
+      host.appendChild(rendered);
+      brandButtons(host);
+      host.addEventListener(
+        'click',
+        function () {
+          setTimeout(function () {
+            brandButtons(host);
+          }, 50);
+        },
+        true
+      );
       if (mountEl) {
         mountEl.appendChild(shell);
       }
