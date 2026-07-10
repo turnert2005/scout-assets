@@ -1,14 +1,13 @@
 /**
- * Scout Adaptive Cards — Webchat v3 message plugin
+ * Scout Adaptive Cards — compact xApp-aligned Webchat v3 plugin
  *
- * Visual system aligned to Scout xApps (assets/css/frontier-tokens.css +
- * xapp-system.css):
- *   Primary Green #006643 | Cyan #00ACEC | Surfaces white / F8FAFB
- *   Text #1A1A1A / #576E77 | Montserrat | radius-lg 12px | green-tinted shadows
- *   Primary buttons = solid Frontier green (scout-btn-primary)
- *   Secondary buttons = cyan outline (scout-btn-secondary)
+ * Matches Scout xApps (frontier-tokens + xapp-system):
+ *   Green #006643 | Cyan #00ACEC | Montserrat | white surfaces
+ *   Solid green headers (white text), scout-btn primary/secondary
+ *   Minimal chrome: no fake "F" mark, no dual headers
+ *   Dense spacing so full card fits without scroll
  *
- * Match: adaptivecards (official) + adaptivecard (Scout legacy)
+ * Match: adaptivecards + adaptivecard
  */
 (function () {
   'use strict';
@@ -17,22 +16,22 @@
     'https://cdn.jsdelivr.net/npm/adaptivecards@3.0.5/dist/adaptivecards.min.js';
   var FONT_URL =
     'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap';
+  var LOGO_URL =
+    'https://turnert2005.github.io/scout-assets/frontier-logo.png';
+
   var sdkLoading = null;
   var stylesInjected = false;
 
-  // Mirror assets/css/frontier-tokens.css (xApp system)
   var T = {
     green: '#006643',
     greenHover: '#005538',
     cyan: '#00ACEC',
     cyanSoft: 'rgba(0,172,236,0.08)',
-    grayDark: '#4C4C4C',
-    grayMid: '#9A9A9A',
     grayLight: '#E8E8E8',
     grayBlue: '#576E77',
+    grayMid: '#9A9A9A',
     surface: '#FFFFFF',
     surfaceSecondary: '#F8FAFB',
-    surfaceGreenTint: 'rgba(0,102,67,0.04)',
     text: '#1A1A1A',
     textInverse: '#FFFFFF',
     radiusLg: '12px',
@@ -40,7 +39,6 @@
     radiusXl: '16px',
     shadowMd: '0 2px 8px rgba(0,102,67,0.08)',
     shadowLg: '0 4px 16px rgba(0,102,67,0.10)',
-    shadowSm: '0 1px 2px rgba(0,102,67,0.06)',
     focusRing: '0 0 0 3px rgba(0,172,236,0.4)',
   };
 
@@ -56,61 +54,56 @@
       document.head.appendChild(font);
     }
 
-    // Replace prior style block if hot-reloaded
     var old = document.querySelector('style[data-scout-adaptivecards]');
     if (old) old.parentNode.removeChild(old);
 
     var css = [
-      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }',
+      '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }',
 
-      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 380px; margin: 6px 0 12px; animation: scoutAcIn 0.3s cubic-bezier(0.4,0,0.2,1) both; }',
+      /* Compact shell — weather-card density */
+      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 340px; margin: 4px 0 8px; animation: scoutAcIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }',
+      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid rgba(0,102,67,0.08); box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }',
 
-      /* Frame matches xApp card surfaces: white, soft green shadow, 16px radius */
-      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid ' + T.grayLight + '; box-shadow: ' + T.shadowLg + '; position: relative; }',
+      /* No outer chrome row — Adaptive Card owns the green header like xApps */
+      '.scout-ac-shell .scout-ac-host { padding: 0; background: ' + T.surface + '; }',
+      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 0 !important; }',
+      '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; line-height: 1.35 !important; }',
+      '.scout-ac-shell .ac-container { border-radius: 0 !important; }',
 
-      /* Header bar = xApp kb-header / green→cyan gradient */
-      '.scout-ac-shell .scout-ac-chrome { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; background: linear-gradient(135deg, ' + T.green + ' 0%, #00836E 55%, ' + T.cyan + ' 100%); color: ' + T.textInverse + '; }',
-      '.scout-ac-shell .scout-ac-chrome-left { display: flex; align-items: center; gap: 10px; min-width: 0; }',
-      '.scout-ac-shell .scout-ac-mark { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.16); color: ' + T.textInverse + '; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 1.5px solid rgba(255,255,255,0.35); flex-shrink: 0; }',
-      '.scout-ac-shell .scout-ac-chrome-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.2; }',
-      '.scout-ac-shell .scout-ac-chrome-sub { font-size: 11px; font-weight: 500; opacity: 0.88; line-height: 1.2; margin-top: 2px; }',
-      '.scout-ac-shell .scout-ac-chip { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: ' + T.green + '; background: ' + T.textInverse + '; border-radius: 9999px; padding: 4px 8px; flex-shrink: 0; }',
+      /* Force white text on green emphasis headers (xApp claim-header pattern) */
+      '.scout-ac-shell .ac-container[style*="background-color: #006643"] .ac-textBlock,',
+      '.scout-ac-shell .ac-container[style*="background-color: rgb(0, 102, 67)"] .ac-textBlock,',
+      '.scout-ac-shell .ac-container[style*="background-color:#006643"] .ac-textBlock { color: #FFFFFF !important; }',
 
-      '.scout-ac-shell .scout-ac-host { padding: 4px 6px 12px; background: ' + T.surfaceSecondary + '; }',
-      '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 4px 6px 2px !important; }',
-      '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; color: ' + T.text + ' !important; line-height: 1.5 !important; }',
-      '.scout-ac-shell .ac-container { border-radius: ' + T.radiusLg + ' !important; }',
+      /* Body padding after bleed header */
+      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-textBlock,',
+      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-container { }',
 
-      /* Action set: stack like xApp footers */
-      '.scout-ac-shell .ac-actionSet { gap: 8px !important; }',
+      /* Compact facts */
+      '.scout-ac-shell .ac-fact-title { color: ' + T.grayMid + ' !important; font-weight: 600 !important; font-size: 10px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; padding-right: 8px !important; }',
+      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 600 !important; font-size: 13px !important; }',
+      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; margin: 6px 0 !important; }',
 
-      /* Base button = .scout-btn */
-      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 44px !important; padding: 12px 24px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; }',
+      /* Actions — compact scout-btn */
+      '.scout-ac-shell .ac-actionSet { gap: 6px !important; padding: 0 12px 12px !important; margin: 0 !important; }',
+      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 40px !important; max-height: 40px !important; padding: 8px 16px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; }',
       '.scout-ac-shell .ac-pushButton:focus-visible, .scout-ac-shell .ac-actionSet button:focus-visible { box-shadow: ' + T.focusRing + ' !important; }',
 
-      /* Primary = scout-btn-primary (Frontier green solid) */
-      '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive { background: ' + T.green + ' !important; background-color: ' + T.green + ' !important; color: ' + T.textInverse + ' !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell button.scout-ac-btn-primary:hover, .scout-ac-shell .ac-pushButton.style-positive:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; box-shadow: ' + T.shadowMd + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive { background: ' + T.green + ' !important; background-color: ' + T.green + ' !important; color: #FFFFFF !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary:hover, .scout-ac-shell .ac-pushButton.style-positive:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; }',
       '.scout-ac-shell button.scout-ac-btn-primary:active { transform: scale(0.98) !important; }',
 
-      /* Secondary = scout-btn-secondary (cyan outline) */
       '.scout-ac-shell button.scout-ac-btn-secondary { background: transparent !important; background-color: transparent !important; color: ' + T.cyan + ' !important; border: 2px solid ' + T.cyan + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; background-color: ' + T.cyanSoft + ' !important; box-shadow: ' + T.shadowSm + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; background-color: ' + T.cyanSoft + ' !important; }',
 
-      /* ShowCard expanded region */
-      '.scout-ac-shell .ac-adaptiveCard .ac-container { }',
-
-      '.scout-ac-shell .ac-fact-title { color: ' + T.grayBlue + ' !important; font-weight: 600 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; }',
-      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 700 !important; font-size: 14px !important; }',
-      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; }',
-      '.scout-ac-shell .ac-input { border-radius: ' + T.radiusMd + ' !important; border: 1.5px solid ' + T.grayLight + ' !important; font-family: Montserrat, sans-serif !important; }',
-      '.scout-ac-shell .ac-input:focus { border-color: ' + T.cyan + ' !important; outline: none !important; box-shadow: ' + T.focusRing + ' !important; }',
-
-      '.scout-ac-error { padding: 14px 16px; font-size: 13px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; background: ' + T.surfaceSecondary + '; }',
-      '.scout-ac-loading { padding: 18px 16px; font-size: 12px; font-weight: 600; color: ' + T.green + '; letter-spacing: 0.04em; font-family: Montserrat, sans-serif; background: ' + T.surfaceSecondary + '; }',
-
-      /* Links inside cards */
       '.scout-ac-shell a { color: ' + T.cyan + ' !important; font-weight: 600; }',
+      '.scout-ac-shell .ac-image { border-radius: 4px !important; }',
+
+      /* Body region padding for non-bleed content */
+      '.scout-ac-shell .scout-ac-body-pad { padding: 10px 12px 0; }',
+
+      '.scout-ac-error { padding: 10px 12px; font-size: 12px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; }',
+      '.scout-ac-loading { padding: 12px; font-size: 11px; font-weight: 600; color: ' + T.green + '; font-family: Montserrat, sans-serif; }',
     ].join('\n');
 
     var el = document.createElement('style');
@@ -142,11 +135,11 @@
     return new AdaptiveCards.HostConfig({
       fontFamily: 'Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       fontSizes: {
-        small: 12,
-        default: 14,
-        medium: 16,
-        large: 18,
-        extraLarge: 24,
+        small: 11,
+        default: 13,
+        medium: 14,
+        large: 16,
+        extraLarge: 20,
       },
       fontWeights: {
         lighter: 400,
@@ -154,12 +147,17 @@
         bolder: 700,
       },
       spacing: {
-        small: 6,
-        default: 10,
-        medium: 14,
-        large: 16,
-        extraLarge: 24,
-        padding: 14,
+        small: 4,
+        default: 6,
+        medium: 8,
+        large: 10,
+        extraLarge: 12,
+        padding: 10,
+      },
+      imageSizes: {
+        small: 24,
+        medium: 40,
+        large: 64,
       },
       separator: {
         lineThickness: 1,
@@ -175,19 +173,20 @@
             warning: { default: '#E0B774', subtle: '#C9A05E' },
             attention: { default: '#BD696A', subtle: '#a85a5b' },
             dark: { default: T.text, subtle: T.grayBlue },
-            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
           },
         },
         emphasis: {
+          // Solid Frontier green — same as xApp .claim-header
           backgroundColor: T.green,
           foregroundColors: {
-            default: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
-            accent: { default: T.cyan, subtle: '#A8E4F8' },
-            good: { default: '#B8F0D0', subtle: '#8FDBB0' },
+            default: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            accent: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            good: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
             warning: { default: '#FFE08A', subtle: '#FFD45C' },
             attention: { default: '#FFB4B4', subtle: '#FF8F8F' },
-            dark: { default: T.textInverse, subtle: 'rgba(255,255,255,0.8)' },
-            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
+            dark: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
           },
         },
         accent: {
@@ -199,7 +198,7 @@
             warning: { default: '#B8860B', subtle: '#D4A84B' },
             attention: { default: '#BD696A', subtle: '#a85a5b' },
             dark: { default: T.text, subtle: T.grayBlue },
-            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.85)' },
           },
         },
         good: {
@@ -211,14 +210,14 @@
             warning: { default: '#B8860B', subtle: '#D4A84B' },
             attention: { default: '#BD696A', subtle: '#a85a5b' },
             dark: { default: T.text, subtle: T.grayBlue },
-            light: { default: T.textInverse, subtle: 'rgba(255,255,255,0.85)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.85)' },
           },
         },
       },
       actions: {
-        maxActions: 5,
-        spacing: 'default',
-        buttonSpacing: 8,
+        maxActions: 3,
+        spacing: 'small',
+        buttonSpacing: 6,
         actionsOrientation: 'vertical',
         actionAlignment: 'stretch',
       },
@@ -231,17 +230,6 @@
     return plugin.payload || plugin.card || null;
   }
 
-  function detectVariant(payload) {
-    try {
-      var blob = JSON.stringify(payload || {}).toLowerCase();
-      if (/booking confirmed|confirmation|pnr|boarding/.test(blob)) return 'booking';
-      if (/official faq|knowledge|faq/.test(blob)) return 'faq';
-    } catch (e) {
-      /* ignore */
-    }
-    return 'default';
-  }
-
   function styleButtons(root) {
     if (!root) return;
     var buttons = root.querySelectorAll('button, .ac-pushButton, a.ac-pushButton');
@@ -250,16 +238,14 @@
       var label = (btn.textContent || '').trim().toLowerCase();
       var isPrimary =
         btn.classList.contains('style-positive') ||
-        /read full|manage this booking|confirm|continue|submit|done|yes|book/.test(label) ||
+        /read full|manage|confirm|continue|submit|done|yes|book/.test(label) ||
         i === 0;
       btn.classList.remove('scout-ac-btn-primary', 'scout-ac-btn-secondary');
       btn.classList.add(isPrimary ? 'scout-ac-btn-primary' : 'scout-ac-btn-secondary');
-
-      // Override Adaptive Cards inline paints without blocking clicks
       if (isPrimary) {
         btn.style.setProperty('background', T.green, 'important');
         btn.style.setProperty('background-color', T.green, 'important');
-        btn.style.setProperty('color', T.textInverse, 'important');
+        btn.style.setProperty('color', '#FFFFFF', 'important');
         btn.style.setProperty('border', '2px solid ' + T.green, 'important');
       } else {
         btn.style.setProperty('background', 'transparent', 'important');
@@ -271,32 +257,41 @@
       btn.style.setProperty('cursor', 'pointer', 'important');
       btn.style.setProperty('opacity', '1', 'important');
       btn.removeAttribute('disabled');
-      if (btn.getAttribute('aria-disabled') === 'true') {
-        btn.setAttribute('aria-disabled', 'false');
+    }
+  }
+
+  function forceHeaderContrast(root) {
+    if (!root) return;
+    // Any container painted Frontier green gets white text (xApp header rule)
+    var containers = root.querySelectorAll('.ac-container');
+    for (var i = 0; i < containers.length; i++) {
+      var el = containers[i];
+      var bg = (el.style && el.style.backgroundColor) || getComputedStyle(el).backgroundColor || '';
+      var isGreen =
+        /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(bg) ||
+        /#006643/i.test(bg) ||
+        bg === 'rgb(0, 102, 67)';
+      if (!isGreen) continue;
+      var texts = el.querySelectorAll('.ac-textBlock, p, span, div');
+      for (var j = 0; j < texts.length; j++) {
+        texts[j].style.setProperty('color', '#FFFFFF', 'important');
       }
     }
   }
 
-  /**
-   * Action handling:
-   * - OpenUrl: open in new tab (must run BEFORE getData — OpenUrl also has getData)
-   * - Submit / Execute: send chat message with action title + data
-   * - ShowCard: handled by Adaptive Cards SDK (no-op here)
-   */
   function handleAction(action, onSendMessage) {
     if (!action) return;
-
     var typeName = '';
     try {
-      typeName = (action.getJsonTypeName && action.getJsonTypeName()) || action.constructor && action.constructor.name || '';
+      typeName =
+        (action.getJsonTypeName && action.getJsonTypeName()) ||
+        (action.constructor && action.constructor.name) ||
+        '';
     } catch (e) {
       typeName = '';
     }
-
-    // ShowCard is expanded by the SDK; do not treat as message
     if (/ShowCard/i.test(typeName)) return;
 
-    // OpenUrl — check url first
     var url = null;
     try {
       if (action.url) url = action.url;
@@ -309,7 +304,6 @@
       return;
     }
 
-    // Submit / Execute / ToggleVisibility with data
     var data = null;
     try {
       if (typeof action.getData === 'function') data = action.getData();
@@ -325,15 +319,11 @@
       } catch (e4) {
         title = '';
       }
-      // Prefer human-readable title so the bot receives a normal utterance
       var text = title || (data && data.action) || 'Card action';
       onSendMessage(String(text), {
         adaptivecards: data || {},
         _cognigy: {
-          _plugin: {
-            type: 'adaptivecards',
-            data: data || {},
-          },
+          _plugin: { type: 'adaptivecards', data: data || {} },
         },
       });
     }
@@ -347,7 +337,6 @@
 
     var message = props.message || {};
     var payload = getPayload(message);
-    var variant = detectVariant(payload);
 
     var useState = React.useState;
     var useEffect = React.useEffect;
@@ -388,11 +377,12 @@
               if (rendered) {
                 hostRef.current.appendChild(rendered);
                 styleButtons(hostRef.current);
-                // Restyle after ShowCard expands (bubble, non-capturing)
-                hostRef.current.addEventListener('click', function (ev) {
-                  // Do not stop propagation — AC needs the click
+                forceHeaderContrast(hostRef.current);
+                hostRef.current.addEventListener('click', function () {
                   setTimeout(function () {
-                    if (hostRef.current) styleButtons(hostRef.current);
+                    if (!hostRef.current) return;
+                    styleButtons(hostRef.current);
+                    forceHeaderContrast(hostRef.current);
                   }, 0);
                 });
               }
@@ -414,38 +404,14 @@
       [payload]
     );
 
-    var chromeLabel =
-      variant === 'booking'
-        ? 'Booking'
-        : variant === 'faq'
-          ? 'Official FAQ'
-          : 'Scout card';
-
-    var frameChildren = [
-      createElement(
-        'div',
-        { className: 'scout-ac-chrome', key: 'chrome' },
-        createElement(
-          'div',
-          { className: 'scout-ac-chrome-left' },
-          createElement('div', { className: 'scout-ac-mark' }, 'F'),
-          createElement(
-            'div',
-            null,
-            createElement('div', { className: 'scout-ac-chrome-title' }, 'Frontier Scout'),
-            createElement('div', { className: 'scout-ac-chrome-sub' }, chromeLabel)
-          )
-        ),
-        createElement('div', { className: 'scout-ac-chip' }, 'Scout')
-      ),
-    ];
+    var kids = [];
     if (status === 'loading') {
-      frameChildren.push(
+      kids.push(
         createElement('div', { className: 'scout-ac-loading', key: 'load' }, 'Loading…')
       );
     }
     if (status === 'error') {
-      frameChildren.push(
+      kids.push(
         createElement(
           'div',
           { className: 'scout-ac-error', key: 'err' },
@@ -453,7 +419,7 @@
         )
       );
     }
-    frameChildren.push(
+    kids.push(
       createElement('div', {
         key: 'host',
         className: 'scout-ac-host',
@@ -463,11 +429,8 @@
 
     return createElement(
       'div',
-      Object.assign({}, props.attributes || {}, {
-        className: 'scout-ac-shell',
-        'data-variant': variant,
-      }),
-      createElement('div', { className: 'scout-ac-frame' }, frameChildren)
+      Object.assign({}, props.attributes || {}, { className: 'scout-ac-shell' }),
+      createElement('div', { className: 'scout-ac-frame' }, kids)
     );
   }
 
@@ -482,6 +445,9 @@
     }
     window.cognigyWebchatMessagePlugins.push(plugin);
   }
+
+  // Expose logo URL for payload builders / diagnostics
+  window.__SCOUT_AC_LOGO__ = LOGO_URL;
 
   register('adaptivecards');
   register('adaptivecard');
