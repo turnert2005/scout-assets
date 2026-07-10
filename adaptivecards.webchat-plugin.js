@@ -1,13 +1,10 @@
 /**
- * Scout Adaptive Cards — compact xApp-aligned Webchat v3 plugin
+ * Scout Adaptive Cards — official Frontier brand, xApp-aligned density
  *
- * Matches Scout xApps (frontier-tokens + xapp-system):
- *   Green #006643 | Cyan #00ACEC | Montserrat | white surfaces
- *   Solid green headers (white text), scout-btn primary/secondary
- *   Minimal chrome: no fake "F" mark, no dual headers
- *   Dense spacing so full card fits without scroll
- *
- * Match: adaptivecards + adaptivecard
+ * Tokens: frontier-tokens.css (#006643, #00ACEC, Montserrat)
+ * Header: solid green + white type (claim-header pattern)
+ * Marks: official Badge / domain icons from brand kit (not custom AI art)
+ * Spacing: 16px rhythm, comfortable type scale, no dual chrome
  */
 (function () {
   'use strict';
@@ -16,8 +13,6 @@
     'https://cdn.jsdelivr.net/npm/adaptivecards@3.0.5/dist/adaptivecards.min.js';
   var FONT_URL =
     'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap';
-  var LOGO_URL =
-    'https://turnert2005.github.io/scout-assets/frontier-logo.png';
 
   var sdkLoading = null;
   var stylesInjected = false;
@@ -33,12 +28,9 @@
     surface: '#FFFFFF',
     surfaceSecondary: '#F8FAFB',
     text: '#1A1A1A',
-    textInverse: '#FFFFFF',
     radiusLg: '12px',
-    radiusMd: '8px',
     radiusXl: '16px',
-    shadowMd: '0 2px 8px rgba(0,102,67,0.08)',
-    shadowLg: '0 4px 16px rgba(0,102,67,0.10)',
+    shadow: '0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)',
     focusRing: '0 0 0 3px rgba(0,172,236,0.4)',
   };
 
@@ -60,50 +52,42 @@
     var css = [
       '@keyframes scoutAcIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }',
 
-      /* Compact shell — weather-card density */
-      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 340px; margin: 4px 0 8px; animation: scoutAcIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }',
-      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid rgba(0,102,67,0.08); box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }',
-
-      /* No outer chrome row — Adaptive Card owns the green header like xApps */
+      '.scout-ac-shell { font-family: Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 360px; margin: 6px 0 10px; animation: scoutAcIn 0.28s cubic-bezier(0.4,0,0.2,1) both; }',
+      '.scout-ac-shell .scout-ac-frame { border-radius: ' + T.radiusXl + '; overflow: hidden; background: ' + T.surface + '; border: 1px solid rgba(0,102,67,0.10); box-shadow: ' + T.shadow + '; }',
       '.scout-ac-shell .scout-ac-host { padding: 0; background: ' + T.surface + '; }',
       '.scout-ac-shell .ac-adaptiveCard { background: transparent !important; font-family: Montserrat, sans-serif !important; padding: 0 !important; }',
-      '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; line-height: 1.35 !important; }',
+      '.scout-ac-shell .ac-textBlock { font-family: Montserrat, sans-serif !important; line-height: 1.45 !important; margin: 0 !important; }',
       '.scout-ac-shell .ac-container { border-radius: 0 !important; }',
 
-      /* Force white text on green emphasis headers (xApp claim-header pattern) */
+      /* Green header blocks → always white type (xApp claim-header) */
       '.scout-ac-shell .ac-container[style*="background-color: #006643"] .ac-textBlock,',
       '.scout-ac-shell .ac-container[style*="background-color: rgb(0, 102, 67)"] .ac-textBlock,',
       '.scout-ac-shell .ac-container[style*="background-color:#006643"] .ac-textBlock { color: #FFFFFF !important; }',
 
-      /* Body padding after bleed header */
-      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-textBlock,',
-      '.scout-ac-shell .ac-adaptiveCard > .ac-container + .ac-container { }',
+      /* Domain icon in body: keep green icon crisp on white */
+      '.scout-ac-shell img { object-fit: contain !important; display: block !important; }',
 
-      /* Compact facts */
-      '.scout-ac-shell .ac-fact-title { color: ' + T.grayMid + ' !important; font-weight: 600 !important; font-size: 10px !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; padding-right: 8px !important; }',
-      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 600 !important; font-size: 13px !important; }',
-      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; margin: 6px 0 !important; }',
+      /* Facts: calm, even rhythm */
+      '.scout-ac-shell .ac-factSet { margin: 0 !important; }',
+      '.scout-ac-shell .ac-fact-title { color: ' + T.grayMid + ' !important; font-weight: 600 !important; font-size: 11px !important; text-transform: uppercase !important; letter-spacing: 0.04em !important; padding: 2px 12px 2px 0 !important; vertical-align: top !important; }',
+      '.scout-ac-shell .ac-fact-value { color: ' + T.text + ' !important; font-weight: 600 !important; font-size: 13px !important; padding: 2px 0 !important; }',
+      '.scout-ac-shell .ac-horizontal-separator { border-top-color: ' + T.grayLight + ' !important; margin: 10px 0 !important; }',
 
-      /* Actions — compact scout-btn */
-      '.scout-ac-shell .ac-actionSet { gap: 6px !important; padding: 0 12px 12px !important; margin: 0 !important; }',
-      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 40px !important; max-height: 40px !important; padding: 8px 16px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; }',
-      '.scout-ac-shell .ac-pushButton:focus-visible, .scout-ac-shell .ac-actionSet button:focus-visible { box-shadow: ' + T.focusRing + ' !important; }',
+      /* Actions: scout-btn sizing (44px tap) with 16px side padding */
+      '.scout-ac-shell .ac-actionSet { display: flex !important; flex-direction: column !important; gap: 8px !important; padding: 4px 16px 16px !important; margin: 0 !important; }',
+      '.scout-ac-shell .ac-pushButton, .scout-ac-shell .ac-actionSet button, .scout-ac-shell button.ac-pushButton { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 44px !important; padding: 12px 20px !important; border-radius: ' + T.radiusLg + ' !important; font-family: Montserrat, sans-serif !important; font-size: 14px !important; font-weight: 600 !important; cursor: pointer !important; transition: all 150ms cubic-bezier(0.4,0,0.2,1) !important; outline: none !important; box-sizing: border-box !important; pointer-events: auto !important; -webkit-appearance: none !important; appearance: none !important; letter-spacing: 0 !important; }',
+      '.scout-ac-shell .ac-pushButton:focus-visible { box-shadow: ' + T.focusRing + ' !important; }',
 
       '.scout-ac-shell button.scout-ac-btn-primary, .scout-ac-shell .ac-pushButton.style-positive { background: ' + T.green + ' !important; background-color: ' + T.green + ' !important; color: #FFFFFF !important; border: 2px solid ' + T.green + ' !important; box-shadow: none !important; }',
-      '.scout-ac-shell button.scout-ac-btn-primary:hover, .scout-ac-shell .ac-pushButton.style-positive:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; }',
+      '.scout-ac-shell button.scout-ac-btn-primary:hover { background: ' + T.greenHover + ' !important; background-color: ' + T.greenHover + ' !important; border-color: ' + T.greenHover + ' !important; }',
       '.scout-ac-shell button.scout-ac-btn-primary:active { transform: scale(0.98) !important; }',
 
       '.scout-ac-shell button.scout-ac-btn-secondary { background: transparent !important; background-color: transparent !important; color: ' + T.cyan + ' !important; border: 2px solid ' + T.cyan + ' !important; box-shadow: none !important; }',
       '.scout-ac-shell button.scout-ac-btn-secondary:hover { background: ' + T.cyanSoft + ' !important; background-color: ' + T.cyanSoft + ' !important; }',
 
       '.scout-ac-shell a { color: ' + T.cyan + ' !important; font-weight: 600; }',
-      '.scout-ac-shell .ac-image { border-radius: 4px !important; }',
-
-      /* Body region padding for non-bleed content */
-      '.scout-ac-shell .scout-ac-body-pad { padding: 10px 12px 0; }',
-
-      '.scout-ac-error { padding: 10px 12px; font-size: 12px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; }',
-      '.scout-ac-loading { padding: 12px; font-size: 11px; font-weight: 600; color: ' + T.green + '; font-family: Montserrat, sans-serif; }',
+      '.scout-ac-error { padding: 16px; font-size: 13px; color: ' + T.grayBlue + '; font-family: Montserrat, sans-serif; }',
+      '.scout-ac-loading { padding: 16px; font-size: 12px; font-weight: 600; color: ' + T.green + '; font-family: Montserrat, sans-serif; }',
     ].join('\n');
 
     var el = document.createElement('style');
@@ -135,11 +119,11 @@
     return new AdaptiveCards.HostConfig({
       fontFamily: 'Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       fontSizes: {
-        small: 11,
-        default: 13,
-        medium: 14,
-        large: 16,
-        extraLarge: 20,
+        small: 12,
+        default: 14,
+        medium: 16,
+        large: 18,
+        extraLarge: 22,
       },
       fontWeights: {
         lighter: 400,
@@ -147,17 +131,17 @@
         bolder: 700,
       },
       spacing: {
-        small: 4,
-        default: 6,
-        medium: 8,
-        large: 10,
-        extraLarge: 12,
-        padding: 10,
+        small: 8,
+        default: 12,
+        medium: 16,
+        large: 20,
+        extraLarge: 24,
+        padding: 16,
       },
       imageSizes: {
-        small: 24,
-        medium: 40,
-        large: 64,
+        small: 32,
+        medium: 48,
+        large: 72,
       },
       separator: {
         lineThickness: 1,
@@ -173,24 +157,23 @@
             warning: { default: '#E0B774', subtle: '#C9A05E' },
             attention: { default: '#BD696A', subtle: '#a85a5b' },
             dark: { default: T.text, subtle: T.grayBlue },
-            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
           },
         },
         emphasis: {
-          // Solid Frontier green — same as xApp .claim-header
           backgroundColor: T.green,
           foregroundColors: {
-            default: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
-            accent: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
-            good: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            default: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            accent: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            good: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
             warning: { default: '#FFE08A', subtle: '#FFD45C' },
             attention: { default: '#FFB4B4', subtle: '#FF8F8F' },
-            dark: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
-            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.88)' },
+            dark: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
+            light: { default: '#FFFFFF', subtle: 'rgba(255,255,255,0.90)' },
           },
         },
         accent: {
-          backgroundColor: 'rgba(0,172,236,0.10)',
+          backgroundColor: 'rgba(0,172,236,0.08)',
           foregroundColors: {
             default: { default: T.text, subtle: T.grayBlue },
             accent: { default: T.cyan, subtle: '#0090C7' },
@@ -202,7 +185,7 @@
           },
         },
         good: {
-          backgroundColor: 'rgba(0,102,67,0.06)',
+          backgroundColor: 'rgba(0,102,67,0.05)',
           foregroundColors: {
             default: { default: T.green, subtle: '#33826A' },
             accent: { default: T.cyan, subtle: '#0090C7' },
@@ -216,8 +199,8 @@
       },
       actions: {
         maxActions: 3,
-        spacing: 'small',
-        buttonSpacing: 6,
+        spacing: 'default',
+        buttonSpacing: 8,
         actionsOrientation: 'vertical',
         actionAlignment: 'stretch',
       },
@@ -255,24 +238,23 @@
       }
       btn.style.setProperty('pointer-events', 'auto', 'important');
       btn.style.setProperty('cursor', 'pointer', 'important');
-      btn.style.setProperty('opacity', '1', 'important');
       btn.removeAttribute('disabled');
     }
   }
 
   function forceHeaderContrast(root) {
     if (!root) return;
-    // Any container painted Frontier green gets white text (xApp header rule)
     var containers = root.querySelectorAll('.ac-container');
     for (var i = 0; i < containers.length; i++) {
       var el = containers[i];
-      var bg = (el.style && el.style.backgroundColor) || getComputedStyle(el).backgroundColor || '';
+      var bg = (el.style && el.style.backgroundColor) || '';
+      var cs = getComputedStyle(el).backgroundColor || '';
       var isGreen =
         /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(bg) ||
-        /#006643/i.test(bg) ||
-        bg === 'rgb(0, 102, 67)';
+        /rgb\(\s*0\s*,\s*102\s*,\s*67\s*\)/i.test(cs) ||
+        /#006643/i.test(bg);
       if (!isGreen) continue;
-      var texts = el.querySelectorAll('.ac-textBlock, p, span, div');
+      var texts = el.querySelectorAll('.ac-textBlock, p, span');
       for (var j = 0; j < texts.length; j++) {
         texts[j].style.setProperty('color', '#FFFFFF', 'important');
       }
@@ -445,9 +427,6 @@
     }
     window.cognigyWebchatMessagePlugins.push(plugin);
   }
-
-  // Expose logo URL for payload builders / diagnostics
-  window.__SCOUT_AC_LOGO__ = LOGO_URL;
 
   register('adaptivecards');
   register('adaptivecard');
