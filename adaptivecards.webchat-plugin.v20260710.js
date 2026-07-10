@@ -436,51 +436,8 @@
     window.cognigyWebchatMessagePlugins.push(plugin);
   }
 
-  // Expose for POC visual QA injection inside the live widget
-  window.__SCOUT_AC_RENDER__ = function (payload, mountEl) {
-    injectStyles();
-    return ensureSdk().then(function (AdaptiveCards) {
-      var card = new AdaptiveCards.AdaptiveCard();
-      card.hostConfig = frontierHostConfig(AdaptiveCards);
-      card.onExecuteAction = function (action) {
-        if (action && action.url) {
-          window.open(action.url, '_blank', 'noopener,noreferrer');
-        }
-      };
-      card.parse(payload);
-      var rendered = card.render();
-      var variant = detectVariant(payload);
-      var shell = document.createElement('div');
-      shell.className = 'scout-ac-shell';
-      shell.setAttribute('data-variant', variant);
-      shell.innerHTML =
-        '<div class="scout-ac-frame">' +
-        '<div class="scout-ac-badge">' +
-        '<div class="scout-ac-badge-left">' +
-        '<div class="scout-ac-mark">F</div>' +
-        '<div><div class="scout-ac-badge-text">Frontier Scout</div>' +
-        '<div class="scout-ac-badge-sub">The Sky is for Everyone</div></div>' +
-        '</div><div class="scout-ac-chip">Live</div></div>' +
-        '<div class="scout-ac-host"></div></div>';
-      var host = shell.querySelector('.scout-ac-host');
-      host.appendChild(rendered);
-      brandButtons(host);
-      host.addEventListener(
-        'click',
-        function () {
-          setTimeout(function () {
-            brandButtons(host);
-          }, 50);
-        },
-        true
-      );
-      if (mountEl) {
-        mountEl.appendChild(shell);
-      }
-      return shell;
-    });
-  };
-
+  // No manual inject helpers. Cards render only when Cognigy emits
+  // message data._plugin { type: adaptivecard|adaptivecards, payload }.
   register('adaptivecards');
   register('adaptivecard');
 })();
